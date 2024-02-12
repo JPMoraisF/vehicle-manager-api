@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using VehicleManager.Models;
 using VehicleManager.Models.DTOs;
 using VehicleManager.Services.MaintenanceService;
@@ -24,108 +26,173 @@ namespace VehicleManager.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         [HttpGet(Name = "GetAllVehicles")]
-        public async Task<ActionResult<List<Vehicle>>> Get()
+        public async Task<ActionResult<ServiceResponse<List<Vehicle>>>> Get()
         {
+            var serviceResponse = new ServiceResponse<List<Vehicle>>();
             try
             {
-                var vehicles = await _vehicleService.GetVehiclesAsync();
-                return Ok(vehicles);
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if(string.IsNullOrEmpty(userId))
+                {
+                    serviceResponse.ErrorList.Add($"User Id {userId} not found! ");
+                    return NotFound(serviceResponse);
+                }
+                var vehicles = await _vehicleService.GetVehiclesAsync(userId);
+                serviceResponse.Data = vehicles;
+                return Ok(serviceResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, "Error in GetVehicles");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error in GetVehicles");
+                serviceResponse.ErrorList.Add(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResponse);
             }
         }
 
         [HttpGet("{id}", Name = "GetVehicle")]
-        public async Task<ActionResult<Vehicle>> GetVehicle(int id)
+        [Authorize]
+        public async Task<ActionResult<ServiceResponse<Vehicle>>> GetVehicle(int id)
         {
+            var serviceResponse = new ServiceResponse<Vehicle>();
             try
             {
-                var vehicle = await _vehicleService.GetVehicleAsync(id);
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    serviceResponse.ErrorList.Add($"User Id {userId} incorrect or missing");
+                    return NotFound(serviceResponse);
+                }
+                var vehicle = await _vehicleService.GetVehicleAsync(id, userId);
                 if (vehicle == null)
                 {
-                    return NotFound();
+                    serviceResponse.ErrorList.Add($"Vehicle {id} not found ");
+                    return NotFound(serviceResponse);
                 }
-                return Ok(vehicle);
+                serviceResponse.Data = vehicle;
+                return Ok(serviceResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, "Error in GetVehicle");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error in GetVehicle");
+                serviceResponse.ErrorList.Add(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResponse);
             }
         }
 
+        [Authorize]
         [HttpPost(Name = "AddVehicle")]
-        public async Task<ActionResult<Vehicle>> Post(VehicleCreateDto vehicleCreateDto)
+        public async Task<ActionResult<ServiceResponse<Vehicle>>> Post(VehicleCreateDto vehicleCreateDto)
         {
+            var serviceResponse = new ServiceResponse<Vehicle>();
             try
             {
                 if (vehicleCreateDto == null)
                 {
-                        return BadRequest();
+                    return BadRequest();
                 }
-                var createdVehicle = await _vehicleService.AddVehicleAsync(vehicleCreateDto);
-                return createdVehicle;
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    serviceResponse.ErrorList.Add($"User Id {userId} incorrect or missing");
+                    return NotFound(serviceResponse);
+                }
+                var createdVehicle = await _vehicleService.AddVehicleAsync(vehicleCreateDto, userId);
+                serviceResponse.Data = createdVehicle;
+                return Ok(serviceResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in AddVehicle");
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                serviceResponse.ErrorList.Add(ex.Message );
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResponse);
             }
         }
 
+        [Authorize]
         [HttpPut("{id}", Name = "UpdateVehicle")]
-        public async Task<ActionResult<Vehicle>> Put(int id, VehicleUpdateDto vehicle)
+        public async Task<ActionResult<ServiceResponse<Vehicle>>> Put(int id, VehicleUpdateDto vehicle)
         {
+            var serviceResponse = new ServiceResponse<Vehicle>();
             try
             {
-                var updatedVehicle = await _vehicleService.UpdateVehicleAsync(id, vehicle);
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    serviceResponse.ErrorList.Add($"User Id {userId} incorrect or missing");
+                    return NotFound(serviceResponse);
+                }
+                var updatedVehicle = await _vehicleService.UpdateVehicleAsync(id, userId, vehicle);
                 if (updatedVehicle == null)
                 {
-                    return NotFound();
+                    serviceResponse.ErrorList.Add("Vehicle not found");
+                    return NotFound(serviceResponse);
                 }
-                return Ok(updatedVehicle);
+                serviceResponse.Data = updatedVehicle;
+                return Ok(serviceResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error in UpdateVehicle: {ex.Message}");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error in UpdateVehicle");
+                serviceResponse.ErrorList.Add(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResponse);
             }
         }
 
+        [Authorize]
         [HttpGet("{vehicleId}/maintenances")]
-        public async Task<ActionResult<IEnumerable<Maintenance>>> GetMaintenancesByVehicleId(int vehicleId)
+        public async Task<ActionResult<ServiceResponse<List<Maintenance>>>> GetMaintenancesByVehicleId(int vehicleId)
         {
-            var maintenances = await _maintenanceService.GetVehicleMaintenancesAsync(vehicleId);
-
-            if (maintenances == null || !maintenances.Any())
-            {
-                return NotFound("No maintenances found for the specified vehicle.");
-            }
-
-            return Ok(maintenances);
-        }
-
-        [HttpDelete("{vehicleId}")]
-        public async Task<ActionResult<Vehicle>> Delete(int vehicleId)
-        {
+            var serviceResponse = new ServiceResponse<List<Maintenance>>();
             try
             {
-                var vehicleToDelete = await _vehicleService.GetVehicleAsync(vehicleId);
-                if (vehicleToDelete == null)
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return NotFound();
+                    serviceResponse.ErrorList.Add($"User Id {userId} incorrect or missing");
+                    return NotFound(serviceResponse);
                 }
-                await _vehicleService.DeleteVehicleAsync(vehicleToDelete);
-                return NoContent();
+                var maintenances = await _maintenanceService.GetVehicleMaintenancesAsync(vehicleId);
+                if (maintenances == null || !maintenances.Any())
+                {
+                    serviceResponse.ErrorList.Add($"No maintenances for vehicle {vehicleId} found.");
+                    return NotFound(serviceResponse);
+                }
+                serviceResponse.Data = maintenances;
+                return Ok(serviceResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error in DeleteVehicle: {ex.Message}");
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                serviceResponse.ErrorList.Add(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResponse);
+                throw;
+            }
+
+        }
+
+        [Authorize]
+        [HttpDelete("{vehicleId}")]
+        public async Task<ActionResult<ServiceResponse<Vehicle>>> Delete(int vehicleId)
+        {
+            var serviceResponse = new ServiceResponse<Vehicle>();
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    serviceResponse.ErrorList.Add($"User Id {userId} incorrect or missing");
+                    return NotFound(serviceResponse);
+                }
+                var vehicleToDelete = await _vehicleService.GetVehicleAsync(vehicleId, userId);
+                if (vehicleToDelete == null)
+                {
+                    serviceResponse.ErrorList.Add("Vehicle not found");
+                    return NotFound(serviceResponse);
+                }
+                await _vehicleService.DeleteVehicleAsync(vehicleToDelete);
+                return Ok(serviceResponse);
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.ErrorList.Add(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResponse);
             }
         }
     }

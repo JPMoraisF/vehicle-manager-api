@@ -29,7 +29,7 @@ namespace VehicleManager.Repository.VehicleRepository
             throw new NotImplementedException();
         }
 
-        public Task<Vehicle>? FindByLicensePlateOrVINAsync(string? licensePlate, string? vin)
+        public Task<Vehicle>? FindByLicensePlateOrVINAsync(string? licensePlate, string? vin, string userId)
         {
             throw new NotImplementedException();
         }

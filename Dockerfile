@@ -16,6 +16,7 @@ RUN dotnet publish -c Release -o out
 # Build the runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
 
+ENV ASPNETCORE_ENVIRONMENT=Docker
 WORKDIR /app
 COPY --from=build /app/out ./
 COPY --from=build /root/.dotnet/corefx/cryptography/x509stores/my/* /root/.dotnet/corefx/cryptography/x509stores/my/

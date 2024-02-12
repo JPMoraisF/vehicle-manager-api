@@ -55,10 +55,9 @@ namespace VehicleManager.Repository.VehicleRepository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Vehicle>? FindByLicensePlateOrVINAsync(string? licensePlate, string? vin)
+        public async Task<Vehicle>? FindByLicensePlateOrVINAsync(string? licensePlate, string? vin, string userId)
         {
-            var vehicle = await _context.Vehicle.FirstOrDefaultAsync(v => v.LicensePlate == licensePlate || v.VIN == vin);
-            //String.Equals(v.LicensePlate, licensePlate, StringComparison.InvariantCultureIgnoreCase);
+            var vehicle = await _context.Vehicle.FirstOrDefaultAsync(v => (v.LicensePlate == licensePlate || v.VIN == vin) && v.UserId == userId);
             return vehicle;
         }
     }

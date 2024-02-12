@@ -12,7 +12,7 @@ namespace VehicleManager.Models.DTOs
         public int ModelYear { get; set; }
         public string Image { get; set; } = string.Empty;
         public string? VIN { get; set; } = string.Empty;
-        [Required]
+        [Required]  
         public string LicensePlate { get; set; } = string.Empty;
         public string? Color { get; set; } = string.Empty;
         public string? Notes { get; set; } = string.Empty;

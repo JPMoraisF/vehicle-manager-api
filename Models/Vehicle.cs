@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+using System.ComponentModel.DataAnnotations;
 
 namespace VehicleManager.Models
 {
@@ -20,6 +21,10 @@ namespace VehicleManager.Models
         public string? Notes { get; set; } = string.Empty;
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
         public DateTime DateUpdated { get; set; } = DateTime.UtcNow;
+
+        public User User { get; set; }
+
+        public string UserId { get; set; } = string.Empty;
 
 
 

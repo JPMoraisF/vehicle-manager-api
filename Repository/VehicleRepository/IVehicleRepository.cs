@@ -12,6 +12,6 @@ namespace VehicleManager.Repository.VehicleRepository
         Task<Vehicle> UpdateVehicleAsync(Vehicle vehicle);
         Task DeleteVehicleAsync(Vehicle vehicle);
 
-        Task<Vehicle>? FindByLicensePlateOrVINAsync(string? licensePlate, string? vin);
+        Task<Vehicle>? FindByLicensePlateOrVINAsync(string? licensePlate, string? vin, string userId);
     }
 }

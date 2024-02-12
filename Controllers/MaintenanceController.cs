@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using VehicleManager.Models;
 using VehicleManager.Models.DTOs;
@@ -19,48 +20,75 @@ namespace VehicleManager.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Maintenance>> CreateMaintenance([FromBody] MaintenanceCreateDto maintenanceCreateDto)
+        public async Task<ActionResult<ServiceResponse<Maintenance>>> CreateMaintenance([FromBody] MaintenanceCreateDto maintenanceCreateDto)
         {
-            var createdMaintenance = await _maintenanceService.AddMaintenanceAsync(maintenanceCreateDto);
-            return Ok(createdMaintenance);
+            var serviceResponse = new ServiceResponse<Maintenance>();
+            try
+            {
+                var createdMaintenance = await _maintenanceService.AddMaintenanceAsync(maintenanceCreateDto);
+                serviceResponse.Data = createdMaintenance;
+                return Ok(serviceResponse);
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.ErrorList.Add(ex.Message);    
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResponse);
+            }
         }
 
+        [Authorize]
         [HttpGet("{maintenanceId}")]
-        public async Task<ActionResult<Maintenance>> GetMaintenanceByMaintenanceId(int maintenanceId)
+        public async Task<ActionResult<ServiceResponse<Maintenance>>> GetMaintenanceByMaintenanceId(int maintenanceId)
         {
+            var serviceResponse = new ServiceResponse<Maintenance>();
             try
             {
                 var services = await _maintenanceService.GetMaintenanceAsync(maintenanceId);
-                return Ok(services);
+                serviceResponse.Data = services;
+                return Ok(serviceResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, "Error in GetServices");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error in GetServices");
+                serviceResponse.ErrorList.Add(ex.Message);  
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResponse);
             }
         }
 
+        [Authorize]
         [HttpDelete("{maintenanceId}")]
-        public async Task<ActionResult> Delete(int maintenanceId)
+        public async Task<ActionResult<ServiceResponse<bool>>> Delete(int maintenanceId)
         {
+            var serviceResponse = new ServiceResponse<Maintenance>();
             try
             {
                 await _maintenanceService.DeleteMaintenanceAsync(maintenanceId);
-                return Ok();
+                return Ok(serviceResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, $"Error in DeleteMaintenance: {ex.Message}");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error in DeleteMaintenance");
+                serviceResponse.ErrorList.Add(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResponse);
             }
         }
 
+        [Authorize]
         [HttpPut("{maintenanceId}", Name = "UpdateMaintenance")]
-        public async Task<ActionResult<Maintenance>> UpdateMaintenance(int maintenanceId, [FromBody] MaintenanceUpdateDto maintenance)
+        public async Task<ActionResult<ServiceResponse<Maintenance>>> UpdateMaintenance(int maintenanceId, [FromBody] MaintenanceUpdateDto maintenance)
         {
-            var updatedMaintenance = await _maintenanceService.UpdateMaintenanceAsync(maintenanceId, maintenance);
-            return Ok(updatedMaintenance);
+            var serviceResponse = new ServiceResponse<Maintenance>();
+            try
+            {
+                var updatedMaintenance = await _maintenanceService.UpdateMaintenanceAsync(maintenanceId, maintenance);
+                serviceResponse.Data = updatedMaintenance;
+                return Ok(serviceResponse);
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.ErrorList.Add(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResponse);
+            }
         }
     }
 }

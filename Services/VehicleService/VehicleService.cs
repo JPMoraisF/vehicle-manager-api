@@ -12,9 +12,9 @@ namespace VehicleManager.Services.VehicleService
         {
             _vehicleRepository = vehicleRepository;
         }
-        public async Task<Vehicle> AddVehicleAsync(VehicleCreateDto vehicleCreateDto)
+        public async Task<Vehicle> AddVehicleAsync(VehicleCreateDto vehicleCreateDto, string userId)
         {
-            var vehicleExists = await _vehicleRepository.FindByLicensePlateOrVINAsync(vehicleCreateDto.LicensePlate, vehicleCreateDto.VIN);
+            var vehicleExists = await _vehicleRepository.FindByLicensePlateOrVINAsync(vehicleCreateDto.LicensePlate, vehicleCreateDto.VIN, userId);
             if(vehicleExists != null)
             {
                 throw new Exception($"Vehicle already exists. ");
@@ -31,13 +31,15 @@ namespace VehicleManager.Services.VehicleService
                 DateAdded = DateTime.UtcNow,
                 DateUpdated = DateTime.UtcNow,
                 KilometersDriven = vehicleCreateDto.KilometersDriven,
+                UserId = userId,
             };
+            
             return await _vehicleRepository.AddVehicleAsync(vehicle);
         }
 
-        public async Task DeleteVehicleAsync(int id)
+        public async Task DeleteVehicleAsync(int id, string userId)
         {
-            var vehicleExists = await this.GetVehicleAsync(id) ?? throw new Exception($"Vehicle with id {id} does not exist. ");
+            var vehicleExists = await this.GetVehicleAsync(id, userId) ?? throw new Exception($"Vehicle with id {id} does not exist. ");
             await _vehicleRepository.DeleteVehicleAsync(vehicleExists);
         }
 
@@ -51,24 +53,25 @@ namespace VehicleManager.Services.VehicleService
             throw new NotImplementedException();
         }
 
-        public async Task<Vehicle>? GetVehicleAsync(int id)
+        public async Task<Vehicle>? GetVehicleAsync(int id, string userId)
         {
             var repoVehicle = await _vehicleRepository.GetVehicleAsync(id);
-            if (repoVehicle != null)
+            if (repoVehicle.UserId == userId)
             {
                 return repoVehicle;
             }
             else return null;
         }
 
-        public async Task<List<Vehicle>> GetVehiclesAsync()
+        public async Task<List<Vehicle>> GetVehiclesAsync(string userId)
         {
-            return await _vehicleRepository.GetVehiclesAsync();
+            var vehicles = await _vehicleRepository.GetVehiclesAsync();
+            return vehicles.Where(v => v.UserId == userId).ToList();
         }
 
-        public async Task<Vehicle>? UpdateVehicleAsync(int vehicleId, VehicleUpdateDto updateDto)
+        public async Task<Vehicle>? UpdateVehicleAsync(int vehicleId, string userId, VehicleUpdateDto updateDto)
         {
-            var existingVehicle = await GetVehicleAsync(vehicleId);
+            var existingVehicle = await GetVehicleAsync(vehicleId, userId);
             
             if (existingVehicle == null)
             {
