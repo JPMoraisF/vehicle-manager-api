@@ -2,7 +2,7 @@
 {
     public class MaintenanceCreateDto
     {
-        public int VehicleId { get; set; }
+        public string LicensePLate { get; set; }
         public DateTime MaintenanceDate { get; set; }
         public int KilometersDriven { get; set; }
         public string? Notes { get; set; }

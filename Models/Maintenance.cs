@@ -10,8 +10,6 @@ namespace VehicleManager.Models
         [Key]
         public int Id { get; set; }
 
-        //public string? Name { get; set; }
-
         [Required]
         public DateTime MaintenanceDate { get; set; } = DateTime.UtcNow;
 
@@ -28,7 +26,7 @@ namespace VehicleManager.Models
         [JsonIgnore]
         public virtual Vehicle Vehicle { get; set; }
 
-        public int VehicleId { get; set; }
+        public string LicensePlate { get; set; }
 
         public void CalculateTotalCost()
         {

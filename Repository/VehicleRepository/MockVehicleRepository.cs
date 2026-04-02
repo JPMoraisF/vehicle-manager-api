@@ -24,24 +24,14 @@ namespace VehicleManager.Repository.VehicleRepository
             throw new NotImplementedException();
         }
 
-        public Task DeleteVehicleAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<Vehicle>? FindByLicensePlateOrVINAsync(string? licensePlate, string? vin, string userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Vehicle> GetVehicleAsync(Vehicle vehicle)
+        public Task<Vehicle?> GetVehicleDetailsAsync(string licensePlate)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<Vehicle>? GetVehicleAsync(int id)
-        {
-            if (id == 1)
+            if (licensePlate == "AAA1234")
             {
                 return Task.FromResult(new Vehicle()
                 {
@@ -50,10 +40,10 @@ namespace VehicleManager.Repository.VehicleRepository
                     ModelName = "Mustang",
                     ModelYear = 2019,
                     Color = "Black",
+                    LicensePlate = "AAA1234",
                 });
             }
             else return Task.FromResult(new Vehicle());
-            
         }
 
         public Task<List<Vehicle>> GetVehiclesAsync()
@@ -91,14 +81,5 @@ namespace VehicleManager.Repository.VehicleRepository
             });
         }
 
-        public Task<Vehicle> UpdateVehicleAsync(int vehicleId, VehicleCreateDto vehicle)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Vehicle> UpdateVehicleAsync(int vehicleId, VehicleUpdateDto vehicle)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

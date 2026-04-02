@@ -18,9 +18,9 @@ namespace VehicleManager.Repository.VehicleRepository
             return await _context.Vehicle.FindAsync(vehicle.Id);
         }
 
-        public async Task<Vehicle> GetVehicleAsync(int id)
+        public async Task<Vehicle?> GetVehicleDetailsAsync(string licensePlate)
         {
-            return await _context.Vehicle.Include(x => x.MaintenanceList).FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Vehicle.Include(x => x.MaintenanceList).FirstOrDefaultAsync((x => x.LicensePlate == licensePlate));
         }
 
         public async Task<List<Vehicle>> GetVehiclesAsync()
@@ -53,12 +53,6 @@ namespace VehicleManager.Repository.VehicleRepository
             var vehicle = await _context.Vehicle.FindAsync(id);
             _context.Vehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
-        }
-
-        public async Task<Vehicle>? FindByLicensePlateOrVINAsync(string? licensePlate, string? vin, string userId)
-        {
-            var vehicle = await _context.Vehicle.FirstOrDefaultAsync(v => (v.LicensePlate == licensePlate || v.VIN == vin) && v.UserId == userId);
-            return vehicle;
         }
     }
 }

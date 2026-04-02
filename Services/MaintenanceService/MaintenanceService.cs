@@ -16,7 +16,7 @@ namespace VehicleManager.Services.MaintenanceService
         {
             var maintenance = new Maintenance
             {
-                VehicleId = maintenanceCreateDto.VehicleId,
+                LicensePlate = maintenanceCreateDto.LicensePLate,
                 MaintenanceDate = maintenanceCreateDto.MaintenanceDate,
                 KilometersDriven = maintenanceCreateDto.KilometersDriven,
                 Notes = maintenanceCreateDto.Notes,
@@ -67,9 +67,9 @@ namespace VehicleManager.Services.MaintenanceService
             return await _maintenanceRepository.GetMaintenanceItemsByMaintenanceId(maintenanceId);
         }
 
-        public async Task<List<Maintenance>> GetVehicleMaintenancesAsync(int vehicleId)
+        public async Task<List<Maintenance>> GetVehicleMaintenancesAsync(string licensePlate)
         {
-            return await _maintenanceRepository.GetVehicleMaintenance(vehicleId);
+            return await _maintenanceRepository.GetVehicleMaintenance(licensePlate);
         }
 
         public async Task<Maintenance> UpdateMaintenanceAsync(int maintenanceId, MaintenanceUpdateDto maintenanceUpdateDto)

@@ -7,7 +7,7 @@ namespace VehicleManager.Services.MaintenanceService
     {
         Task<Maintenance> GetMaintenanceAsync(Maintenance vehicle);
         Task<Maintenance>? GetMaintenanceAsync(int id);
-        Task<List<Maintenance>> GetVehicleMaintenancesAsync(int vehicleId);
+        Task<List<Maintenance>> GetVehicleMaintenancesAsync(string licensePlate);
         Task<Maintenance> AddMaintenanceAsync(MaintenanceCreateDto maintenanceCreateDto);
         Task<Maintenance> UpdateMaintenanceAsync(int maintenanceId, MaintenanceUpdateDto maintenanceUpdateDto);
         Task DeleteMaintenanceAsync(Maintenance vehicle);

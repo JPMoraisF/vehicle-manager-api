@@ -4,7 +4,17 @@ namespace VehicleManager.Repository.MaintenanceRepository
 {
     public class MockMaintenanceRepository : IMaintenanceRepository
     {
+        public Task<List<Maintenance>> GetVehicleMaintenance(string licensePlate)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<Maintenance> AddMaintenanceAsync(Maintenance maintenance)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<MaintenanceItem>> GetMaintenanceItemsByMaintenanceId(int maintenanceId)
         {
             throw new NotImplementedException();
         }
@@ -19,7 +29,7 @@ namespace VehicleManager.Repository.MaintenanceRepository
             throw new NotImplementedException();
         }
 
-        public Task<List<MaintenanceItem>> GetMaintenanceItemsByMaintenanceId(int maintenanceId)
+        public Task<List<MaintenanceItem>> GetMaintenanceItemsByMaintenanceId(string licensePlate)
         {
             throw new NotImplementedException();
         }

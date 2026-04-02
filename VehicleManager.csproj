@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -20,6 +20,28 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="VehicleManagerTests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="VehicleManagerTests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="VehicleManagerTests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="VehicleManagerTests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="VehicleManagerTests\obj\project.assets.json" />
+    <_ContentIncludedByDefault Remove="VehicleManagerTests\obj\project.packagespec.json" />
+    <_ContentIncludedByDefault Remove="VehicleManagerTests\obj\VehicleManagerTests.csproj.nuget.dgspec.json" />
   </ItemGroup>
 
 </Project>

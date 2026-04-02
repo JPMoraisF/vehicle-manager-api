@@ -14,8 +14,8 @@ namespace VehicleManager.Services.VehicleService
         }
         public async Task<Vehicle> AddVehicleAsync(VehicleCreateDto vehicleCreateDto, string userId)
         {
-            var vehicleExists = await _vehicleRepository.FindByLicensePlateOrVINAsync(vehicleCreateDto.LicensePlate, vehicleCreateDto.VIN, userId);
-            if(vehicleExists != null)
+            var vehicleExists = await _vehicleRepository.GetVehicleDetailsAsync(vehicleCreateDto.LicensePlate);
+            if(vehicleExists != null && vehicleExists.UserId == userId)
             {
                 throw new Exception($"Vehicle already exists. ");
             }
@@ -37,30 +37,20 @@ namespace VehicleManager.Services.VehicleService
             return await _vehicleRepository.AddVehicleAsync(vehicle);
         }
 
-        public async Task DeleteVehicleAsync(int id, string userId)
+        public async Task<bool> DeleteVehicleAsync(string licensePlate, string userId)
         {
-            var vehicleExists = await this.GetVehicleAsync(id, userId) ?? throw new Exception($"Vehicle with id {id} does not exist. ");
-            await _vehicleRepository.DeleteVehicleAsync(vehicleExists);
-        }
-
-        public async Task DeleteVehicleAsync(Vehicle vehicle)
-        {
-            await _vehicleRepository.DeleteVehicleAsync(vehicle);
-        }
-
-        public Task<Vehicle> GetVehicleAsync(Vehicle vehicle)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<Vehicle>? GetVehicleAsync(int id, string userId)
-        {
-            var repoVehicle = await _vehicleRepository.GetVehicleAsync(id);
-            if (repoVehicle.UserId == userId)
+            var vehicleExists = await this.GetVehicleDetailsAsync(licensePlate);
+            if (vehicleExists == null || vehicleExists.UserId != userId)
             {
-                return repoVehicle;
+                return false;
             }
-            else return null;
+            await _vehicleRepository.DeleteVehicleAsync(vehicleExists);
+            return true;
+        }
+ 
+        public async Task<Vehicle?> GetVehicleDetailsAsync(string licensePlate)
+        {
+            return await _vehicleRepository.GetVehicleDetailsAsync(licensePlate);
         }
 
         public async Task<List<Vehicle>> GetVehiclesAsync(string userId)
@@ -69,58 +59,27 @@ namespace VehicleManager.Services.VehicleService
             return vehicles.Where(v => v.UserId == userId).ToList();
         }
 
-        public async Task<Vehicle>? UpdateVehicleAsync(int vehicleId, string userId, VehicleUpdateDto updateDto)
+        public async Task<Vehicle?> UpdateVehicleAsync(string licensePlate, string userId, VehicleUpdateDto updateDto)
         {
-            var existingVehicle = await GetVehicleAsync(vehicleId, userId);
+            var existingVehicle = await GetVehicleDetailsAsync(licensePlate);
             
-            if (existingVehicle == null)
+            if (existingVehicle == null || existingVehicle.UserId != userId)
             {
                 return null;
             }
 
-            if (!string.IsNullOrEmpty(updateDto.Make))
+            existingVehicle.Make = string.IsNullOrWhiteSpace(updateDto.Make) ? existingVehicle.Make : updateDto.Make;
+            existingVehicle.ModelName = string.IsNullOrWhiteSpace(updateDto.ModelName) ? existingVehicle.ModelName : updateDto.ModelName;
+            existingVehicle.ModelYear = updateDto.ModelYear ?? existingVehicle.ModelYear;
+            existingVehicle.Image = string.IsNullOrWhiteSpace(updateDto.Image) ? existingVehicle.Image : updateDto.Image;
+            existingVehicle.VIN = string.IsNullOrWhiteSpace(updateDto.VIN) ? existingVehicle.VIN : updateDto.VIN;
+            existingVehicle.LicensePlate = string.IsNullOrWhiteSpace(updateDto.LicensePlate) ? existingVehicle.LicensePlate : updateDto.LicensePlate;
+            existingVehicle.Color = string.IsNullOrWhiteSpace(updateDto.Color) ? existingVehicle.Color : updateDto.Color;
+            existingVehicle.Notes = string.IsNullOrWhiteSpace(updateDto.Notes) ? existingVehicle.Notes : updateDto.Notes;
+    
+            if (updateDto.KilometersDriven.HasValue && updateDto.KilometersDriven.Value >= 0)
             {
-                existingVehicle.Make = updateDto.Make;
-            }
-
-            if (!string.IsNullOrEmpty(updateDto.ModelName))
-            {
-                existingVehicle.ModelName = updateDto.ModelName;
-            }
-
-            if (updateDto.ModelYear.HasValue)
-            {
-                existingVehicle.ModelYear = updateDto.ModelYear.Value;
-            }
-
-            if(!string.IsNullOrEmpty(updateDto.Image))
-            {
-                existingVehicle.Image = updateDto.Image;
-            }
-
-            if (!string.IsNullOrEmpty(updateDto.VIN))
-            {
-                existingVehicle.VIN = updateDto.VIN;
-            }
-
-            if (!string.IsNullOrEmpty(updateDto.LicensePlate))
-            {
-                existingVehicle.LicensePlate = updateDto.LicensePlate;
-            }
-
-            if (!string.IsNullOrEmpty(updateDto.Color))
-            {
-                existingVehicle.Color = updateDto.Color;
-            }
-
-            if (!string.IsNullOrEmpty(updateDto.Notes))
-            {
-                existingVehicle.Notes = updateDto.Notes;
-            }
-
-            if(updateDto.KilometersDriven > 0)
-            {
-                existingVehicle.KilometersDriven = updateDto.KilometersDriven;
+                existingVehicle.KilometersDriven = updateDto.KilometersDriven.Value;
             }
 
             existingVehicle.DateUpdated = DateTime.UtcNow;

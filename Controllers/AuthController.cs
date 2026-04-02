@@ -91,18 +91,22 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] UserDto model)
+    public async Task<IActionResult> Login([FromBody] UserLoginDTO model)
     {
-        var result = await _signInManager.PasswordSignInAsync(model.Name, model.Password, false, false);
-
-        if (result.Succeeded)
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
         {
-            var user = await _userManager.FindByNameAsync(model.Name);
-            var token = GenerateJwtToken(user);
-            return Ok(new { Token = token });
+            return Unauthorized(new { Message = "User or password incorrect" });
         }
 
-        return Unauthorized(new { Message = "User or password incorrect" });
+        var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, isPersistent: false, lockoutOnFailure: false);
+        if (!result.Succeeded)
+        {
+            return Unauthorized(new { Message = "User or password incorrect" });
+        }
+
+        var token = GenerateJwtToken(user);
+        return Ok(new { Token = token });
     }
 
     private string GenerateJwtToken(User user)

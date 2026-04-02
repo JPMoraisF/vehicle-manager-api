@@ -41,10 +41,10 @@ namespace VehicleManager.Repository.MaintenanceRepository
             return maintenanceItem.ToListAsync();
         }
 
-        public Task<List<Maintenance>> GetVehicleMaintenance(int vehicleId)
+        public Task<List<Maintenance>> GetVehicleMaintenance(string licensePlate)
         {
             var maintenances = _context.Maintenances
-                .Where(x => x.VehicleId == vehicleId)
+                .Where(x => x.LicensePlate == licensePlate)
                 .Include(x => x.MaintenanceItems)
                 .ToList();
             return Task.FromResult(maintenances);
